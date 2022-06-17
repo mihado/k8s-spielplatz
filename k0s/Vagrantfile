@@ -1,0 +1,47 @@
+Vagrant.configure("2") do |config|
+
+  base_box = "generic/ubuntu2004"
+
+  # controller
+  1.times do |i|
+    name = "k0s-controller-#{i}"
+
+    config.vm.define name.to_sym do |node|
+      node.vm.hostname = name
+      node.vm.box = base_box
+
+      node.vm.provider :libvirt do |domain|
+        domain.cpus = 2
+        domain.memory = 2048
+      end
+
+      node.vm.network :public_network, mode: "bridge", type: "bridge", dev: "br2",
+        mac: "5c:b4:cb:99:62:a#{i}"
+
+      config.vm.synced_folder "./", "/vagrant"
+      node.vm.provision "shell", path: "./provision.sh"
+    end
+  end
+
+  # worker
+  3.times do |i|
+    name = "k0s-worker-#{i}"
+
+    config.vm.define name.to_sym do |node|
+      node.vm.hostname = name
+      node.vm.box = base_box
+
+      node.vm.provider :libvirt do |domain|
+        domain.cpus = 1
+        domain.memory = 512
+      end
+
+      node.vm.network :public_network, mode: "bridge", type: "bridge", dev: "br3",
+        mac: "5c:b4:cb:99:62:b#{i}"
+
+      config.vm.synced_folder "./", "/vagrant"
+      node.vm.provision "shell", path: "./provision.sh"
+    end
+  end
+
+end
