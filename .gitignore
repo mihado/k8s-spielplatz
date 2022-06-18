@@ -1,2 +1,4 @@
 .vagrant
+.envrc
 id_rsa*
+kubeconfig
